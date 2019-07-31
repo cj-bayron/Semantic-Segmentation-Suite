@@ -52,8 +52,6 @@ def data_augmentation(input_image, output_image):
     # Data augmentation
     
     #input_image, output_image = utils.random_crop(input_image, output_image, args.crop_height, args.crop_width)
-    input_image = cv2.resize(input_image, (args.crop_width, args.crop_height))
-    output_image = cv2.resize(output_image, (args.crop_width, args.crop_height))
 
     if args.h_flip and random.randint(0,1):
         input_image = cv2.flip(input_image, 1)
@@ -176,8 +174,8 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
             index = i*args.batch_size + j
             id = id_list[index]
 
-            input_image = utils.load_image(train_input_names[id])
-            output_image = utils.load_image(train_output_names[id], binarize=True)
+            input_image = utils.load_image(train_input_names[id], resize_dims=(args.crop_width, args.crop_height))
+            output_image = utils.load_image(train_output_names[id], binarize=True, resize_dims=(args.crop_width, args.crop_height))
 
             with tf.device('/cpu:0'):
                 input_image, output_image = data_augmentation(input_image, output_image)
@@ -239,8 +237,8 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         # Do the validation on a small set of validation images
         for ind in val_indices:
 
-            input_image = np.expand_dims(np.float32(utils.load_image(val_input_names[ind])[:args.crop_height, :args.crop_width]),axis=0)/255.0
-            gt = utils.load_image(val_output_names[ind])[:args.crop_height, :args.crop_width]
+            input_image = np.expand_dims(np.float32(utils.load_image(val_input_names[ind], resize_dims=(args.crop_width, args.crop_height))[:args.crop_height, :args.crop_width]),axis=0)/255.0
+            gt = utils.load_image(val_output_names[ind], binarize=True, resize_dims=(args.crop_width, args.crop_height))[:args.crop_height, :args.crop_width]
             gt = helpers.reverse_one_hot(helpers.one_hot_it(gt, label_values))
 
             # st = time.time()

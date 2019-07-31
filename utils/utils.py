@@ -41,13 +41,16 @@ def prepare_data(dataset_dir):
     train_input_names.sort(),train_output_names.sort(), val_input_names.sort(), val_output_names.sort(), test_input_names.sort(), test_output_names.sort()
     return train_input_names,train_output_names, val_input_names, val_output_names, test_input_names, test_output_names
 
-def load_image(path, binarize=False):
+def load_image(path, binarize=False, resize_dims=None):
     image = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
 
     if binarize:
         image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
         image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+
+    if resize_dims is not None:
+        image = cv2.resize(image, (resize_dims[0], resize_dims[1]))
 
     return image
 

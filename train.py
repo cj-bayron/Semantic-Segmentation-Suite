@@ -12,7 +12,7 @@ import subprocess
 # use 'Agg' on matplotlib so that plots could be generated even without Xserver
 # running
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 
 from utils import utils, helpers
 from builders import model_builder
@@ -172,8 +172,9 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         for j in range(args.batch_size):
             index = i*args.batch_size + j
             id = id_list[index]
+
             input_image = utils.load_image(train_input_names[id])
-            output_image = utils.load_image(train_output_names[id])
+            output_image = utils.load_image(train_output_names[id], binarize=True)
 
             with tf.device('/cpu:0'):
                 input_image, output_image = data_augmentation(input_image, output_image)

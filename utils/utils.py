@@ -22,27 +22,33 @@ def prepare_data(dataset_dir):
     test_output_names=[]
     for file in os.listdir(dataset_dir + "/train"):
         cwd = os.getcwd()
-        train_input_names.append(cwd + "/" + dataset_dir + "/train/" + file)
+        train_input_names.append(os.path.join(cwd, dataset_dir, 'train', file))
     for file in os.listdir(dataset_dir + "/train_labels"):
         cwd = os.getcwd()
-        train_output_names.append(cwd + "/" + dataset_dir + "/train_labels/" + file)
+        train_output_names.append(os.path.join(cwd, dataset_dir, 'train_labels', file))
     for file in os.listdir(dataset_dir + "/val"):
         cwd = os.getcwd()
-        val_input_names.append(cwd + "/" + dataset_dir + "/val/" + file)
+        val_input_names.append(os.path.join(cwd, dataset_dir, 'val', file))
     for file in os.listdir(dataset_dir + "/val_labels"):
         cwd = os.getcwd()
-        val_output_names.append(cwd + "/" + dataset_dir + "/val_labels/" + file)
+        val_output_names.append(os.path.join(cwd, dataset_dir, 'val_labels', file))
     for file in os.listdir(dataset_dir + "/test"):
         cwd = os.getcwd()
-        test_input_names.append(cwd + "/" + dataset_dir + "/test/" + file)
+        test_input_names.append(os.path.join(cwd, dataset_dir, 'test', file))
     for file in os.listdir(dataset_dir + "/test_labels"):
         cwd = os.getcwd()
-        test_output_names.append(cwd + "/" + dataset_dir + "/test_labels/" + file)
+        test_output_names.append(os.path.join(cwd, dataset_dir, 'test_labels', file))
     train_input_names.sort(),train_output_names.sort(), val_input_names.sort(), val_output_names.sort(), test_input_names.sort(), test_output_names.sort()
     return train_input_names,train_output_names, val_input_names, val_output_names, test_input_names, test_output_names
 
-def load_image(path):
-    image = cv2.cvtColor(cv2.imread(path,-1), cv2.COLOR_BGR2RGB)
+def load_image(path, binarize=False):
+    image = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
+
+    if binarize:
+        image = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+        _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+
     return image
 
 # Takes an absolute file path and returns the name of the file without th extension

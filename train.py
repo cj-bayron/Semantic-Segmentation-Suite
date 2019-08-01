@@ -102,7 +102,8 @@ loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=network,
 #opt = tf.train.AdamOptimizer(learning_rate=args.init_lr).minimize(loss, var_list=[var for var in tf.trainable_variables()])
 
 # optimizer with gradient clipping
-opt = tf.train.AdamOptimizer(learning_rate=args.init_lr)
+#opt = tf.train.AdamOptimizer(learning_rate=args.init_lr)
+opt = tf.train.RMSPropOptimizer(learning_rate=args.init_lr, decay=0.995)
 gradients, variables = zip(*opt.compute_gradients(loss, var_list=[var for var in tf.trainable_variables()]))
 gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
 opt = opt.apply_gradients(zip(gradients, variables))

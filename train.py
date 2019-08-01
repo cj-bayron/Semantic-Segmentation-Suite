@@ -45,7 +45,9 @@ parser.add_argument('--brightness', type=float, default=None, help='Whether to r
 parser.add_argument('--rotation', type=float, default=None, help='Whether to randomly rotate the image for data augmentation. Specifies the max rotation angle in degrees.')
 parser.add_argument('--model', type=str, default="FC-DenseNet56", help='The model you are using. See model_builder.py for supported models')
 parser.add_argument('--frontend', type=str, default="ResNet101", help='The frontend you are using. See frontend_builder.py for supported models')
+parser.add_argument('--opt', type=str, default="RMSProp", help='Optimizer to use')
 parser.add_argument('--init_lr', type=float, default=0.0001, help='Initial learning rate')
+parser.add_argument('--grad_clipping', type=str2bool, default=False, help='Perform gradient clipping')
 args = parser.parse_args()
 
 
@@ -98,15 +100,20 @@ network, init_fn = model_builder.build_model(model_name=args.model, frontend=arg
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=network, labels=net_output))
 
-#opt = tf.train.RMSPropOptimizer(learning_rate=args.init_lr, decay=0.995).minimize(loss, var_list=[var for var in tf.trainable_variables()])
-#opt = tf.train.AdamOptimizer(learning_rate=args.init_lr).minimize(loss, var_list=[var for var in tf.trainable_variables()])
+if args.opt == 'RMSProp':
+    opt = tf.train.RMSPropOptimizer(learning_rate=args.init_lr, decay=0.995)
+elif args.opt == 'Adam':
+    opt = tf.train.AdamOptimizer(learning_rate=args.init_lr)
+else:
+    raise Exception("Unsupported optimizer!")
 
-# optimizer with gradient clipping
-#opt = tf.train.AdamOptimizer(learning_rate=args.init_lr)
-opt = tf.train.RMSPropOptimizer(learning_rate=args.init_lr, decay=0.995)
-gradients, variables = zip(*opt.compute_gradients(loss, var_list=[var for var in tf.trainable_variables()]))
-gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
-opt = opt.apply_gradients(zip(gradients, variables))
+if not args.grad_clipping:
+    opt = opt.minimize(loss, var_list=[var for var in tf.trainable_variables()])
+else:
+    # perform gradient clipping
+    gradients, variables = zip(*opt.compute_gradients(loss, var_list=[var for var in tf.trainable_variables()]))
+    gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
+    opt = opt.apply_gradients(zip(gradients, variables))
 
 saver=tf.train.Saver(max_to_keep=1000)
 sess.run(tf.global_variables_initializer())

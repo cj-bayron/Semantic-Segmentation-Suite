@@ -212,13 +212,14 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
             output_image_batch = np.squeeze(np.stack(output_image_batch, axis=1))
 
         # Do the training
-        _, current, net_logits = sess.run([opt,loss,network],feed_dict={net_input:input_image_batch,net_output:output_image_batch})
+        # _, current, net_logits = sess.run([opt,loss,network],feed_dict={net_input:input_image_batch,net_output:output_image_batch})
+        _, current = sess.run([opt,loss],feed_dict={net_input:input_image_batch,net_output:output_image_batch})
         current_losses.append(current)
         cnt = cnt + args.batch_size
         if cnt % 20 == 0:
             string_print = "Epoch = %d Count = %d Current_Loss = %.4f Time = %.2f"%(epoch,cnt,current,time.time()-st)
             utils.LOG(string_print)
-            print(net_logits)
+            # print(net_logits)
             st = time.time()
 
     mean_loss = np.mean(current_losses)

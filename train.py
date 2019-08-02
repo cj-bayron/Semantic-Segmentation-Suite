@@ -167,6 +167,7 @@ random.seed(16)
 val_indices=random.sample(range(0,len(val_input_names)),num_vals)
 
 # Do the training here
+best_iou = 0
 for epoch in range(args.epoch_start_i, args.num_epochs):
 
     current_losses = []
@@ -228,10 +229,6 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
     # Create directories if needed
     if not os.path.isdir("%s/%04d"%("checkpoints",epoch)):
         os.makedirs("%s/%04d"%("checkpoints",epoch))
-
-    # Save latest checkpoint to same file name
-    print("Saving latest checkpoint")
-    saver.save(sess, model_checkpoint_name)
 
     if val_indices != 0 and epoch % args.checkpoint_step == 0:
         print("Saving checkpoint for this epoch")
@@ -310,6 +307,12 @@ for epoch in range(args.epoch_start_i, args.num_epochs):
         print("Validation recall = ", avg_recall)
         print("Validation F1 score = ", avg_f1)
         print("Validation IoU score = ", avg_iou)
+
+        # Save latest checkpoint to same file name
+        if (avg_iou > best_iou):
+            print("New best IoU. Saving latest checkpoint")
+            saver.save(sess, model_checkpoint_name)
+            best_iou = avg_iou
 
     epoch_time=time.time()-epoch_st
     remain_time=epoch_time*(args.num_epochs-1-epoch)
